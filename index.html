@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理健康自测工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .welcome-screen, .question-screen, .result-screen {
+            display: none;
+        }
+
+        .welcome-screen.active, .question-screen.active, .result-screen.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .welcome-screen p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .welcome-screen ul {
+            color: #666;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+        .welcome-screen li {
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s;
+            border-radius: 4px;
+        }
+
+        .question-number {
+            color: #764ba2;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            background: #f0f1ff;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .option-radio {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #999;
+            border-radius: 50%;
+            margin-right: 15px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .option input[type="radio"]:checked + .option-content .option-radio {
+            border-color: #667eea;
+            background: #667eea;
+        }
+
+        .option input[type="radio"]:checked + .option-content .option-radio::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .option-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .option-text {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 26px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .result-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .result-card p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-display h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .score-display .score {
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .disclaimer p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .level-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .level-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .level-mild {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .level-moderate {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .level-severe {
+            background: #721c24;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>心理健康自测工具</h1>
+            <p>焦虑与抑郁情绪评估</p>
+        </div>
+
+        <div class="content">
+            <!-- 欢迎页面 -->
+            <div class="welcome-screen active">
+                <h2>欢迎使用心理健康自测工具</h2>
+                <p>这是一个简单的自我评估工具,帮助你了解自己的情绪状态。请根据过去两周内的真实感受回答以下问题。</p>
+                <ul>
+                    <li>共有10道题目</li>
+                    <li>每道题有4个选项</li>
+                    <li>请选择最符合你情况的答案</li>
+                    <li>测试时间约3-5分钟</li>
+                </ul>
+                <div class="disclaimer">
+                    <p><strong>重要提示:</strong> 本测试仅供参考,不能替代专业的心理健康评估。如果你感到持续的情绪困扰,请寻求专业心理咨询师或医生的帮助。</p>
+                </div>
+                <button class="btn" onclick="startTest()">开始测试</button>
+            </div>
+
+            <!-- 问题页面 -->
+            <div class="question-screen">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+                <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>下一题</button>
+            </div>
+
+            <!-- 结果页面 -->
+            <div class="result-screen">
+                <h2>测评结果</h2>
+                <div id="resultContent"></div>
+                <button class="btn" onclick="restartTest()">重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                text: "在过去两周内,你是否感到情绪低落、沮丧或绝望?",
+                options: [
+                    { text: "完全不会", score: 0 },
+                    { text: "偶尔会", score: 1 },
+                    { text: "经常会", score: 2 },
+                    { text: "几乎每天", score: 3 }
+                ],
+                type: "depression"
+            },
+            {
+                id: 2,
+                text: "你是否对日常活动失去兴趣或乐趣?",
+                options: [
+                    { text: "完全没有", score: 0 },
+                    { text: "有一点", score: 1 },
+                    { text: "比较明显", score: 2 },
+                    { text: "非常明显", score: 3 }
+                ],
+                type: "depression"
+            },
+            {
+                id: 3,
+                text: "你是否感到紧张、焦虑或烦躁不安?",
+                options: [
+                    { text: "完全不会", score: 0 },
+                    { text: "偶尔会", score: 1 },
+                    { text: "经常会", score: 2 },
+                    { text: "几乎每天", score: 3 }
+                ],
+                type: "anxiety"
+            },
+            {
+                id: 4,
+                text: "你是否难以停止或控制自己的担心?",
+                options: [
+                    { text: "完全没有困难", score: 0 },
+                    { text: "有一点困难", score: 1 },
+                    { text: "比较困难", score: 2 },
+                    { text: "非常困难", score: 3 }
+                ],
+                type: "anxiety"
+            },
+            {
+                id: 5,
+                text: "你的睡眠质量如何?(入睡困难、易醒或睡眠过多)",
+                options: [
+                    { text: "睡眠良好", score: 0 },
+                    { text: "偶有问题", score: 1 },
+                    { text: "经常有问题", score: 2 },
+                    { text: "严重问题", score: 3 }
+                ],
+                type: "both"
+            },
+            {
+                id: 6,
+                text: "你是否感到疲倦或缺乏精力?",
+                options: [
+                    { text: "精力充沛", score: 0 },
+                    { text: "偶尔疲倦", score: 1 },
+                    { text: "经常疲倦", score: 2 },
+                    { text: "持续疲倦", score: 3 }
+                ],
+                type: "both"
+            },
+            {
+                id: 7,
+                text: "你是否对许多不同的事情感到过度担心?",
+                options: [
+                    { text: "很少担心", score: 0 },
+                    { text: "有时担心", score: 1 },
+                    { text: "经常担心", score: 2 },
+                    { text: "总是担心", score: 3 }
+                ],
+                type: "anxiety"
+            },
+            {
+                id: 8,
+                text: "你是否觉得自己很失败,或让自己或家人失望?",
+                options: [
+                    { text: "完全不会", score: 0 },
+                    { text: "偶尔会", score: 1 },
+                    { text: "经常会", score: 2 },
+                    { text: "几乎每天", score: 3 }
+                ],
+                type: "depression"
+            },
+            {
+                id: 9,
+                text: "你是否难以集中注意力(如阅读、看电视)?",
+                options: [
+                    { text: "没有困难", score: 0 },
+                    { text: "有点困难", score: 1 },
+                    { text: "比较困难", score: 2 },
+                    { text: "非常困难", score: 3 }
+                ],
+                type: "both"
+            },
+            {
+                id: 10,
+                text: "你的食欲是否发生明显变化?(食欲不振或暴饮暴食)",
+                options: [
+                    { text: "食欲正常", score: 0 },
+                    { text: "轻微变化", score: 1 },
+                    { text: "明显变化", score: 2 },
+                    { text: "严重变化", score: 3 }
+                ],
+                type: "both"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        function startTest() {
+            document.querySelector('.welcome-screen').classList.remove('active');
+            document.querySelector('.question-screen').classList.add('active');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('questionNumber').textContent = `第 ${currentQuestion + 1} 题 / 共 ${questions.length} 题`;
+            document.getElementById('questionText').textContent = question.text;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('label');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <input type="radio" name="answer" value="${option.score}" onchange="enableNextButton()">
+                    <div class="option-content">
+                        <div class="option-radio"></div>
+                        <div class="option-text">${option.text}</div>
+                    </div>
+                `;
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        function enableNextButton() {
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (!selectedOption) return;
+            
+            answers.push({
+                questionId: questions[currentQuestion].id,
+                type: questions[currentQuestion].type,
+                score: parseInt(selectedOption.value)
+            });
+            
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.querySelector('.question-screen').classList.remove('active');
+            document.querySelector('.result-screen').classList.add('active');
+            
+            // 计算分数
+            let totalScore = 0;
+            let anxietyScore = 0;
+            let depressionScore = 0;
+            
+            answers.forEach(answer => {
+                totalScore += answer.score;
+                if (answer.type === 'anxiety') {
+                    anxietyScore += answer.score;
+                } else if (answer.type === 'depression') {
+                    depressionScore += answer.score;
+                } else if (answer.type === 'both') {
+                    anxietyScore += answer.score;
+                    depressionScore += answer.score;
+                }
+            });
+            
+            // 生成结果
+            const resultContent = document.getElementById('resultContent');
+            
+            let overallLevel, overallText, overallClass;
+            if (totalScore <= 7) {
+                overallLevel = "良好";
+                overallClass = "level-low";
+                overallText = "你的整体情绪状态良好,没有明显的焦虑或抑郁症状。继续保持健康的生活方式和积极的心态。";
+            } else if (totalScore <= 14) {
+                overallLevel = "轻度";
+                overallClass = "level-mild";
+                overallText = "你可能存在轻度的情绪困扰。建议关注自己的心理健康,适当调整生活节奏,增加运动和社交活动。";
+            } else if (totalScore <= 21) {
+                overallLevel = "中度";
+                overallClass = "level-moderate";
+                overallText = "你可能存在中度的焦虑或抑郁症状。建议寻求心理咨询师的帮助,学习有效的情绪管理技巧。";
+            } else {
+                overallLevel = "较重";
+                overallClass = "level-severe";
+                overallText = "你可能存在较严重的情绪问题。强烈建议尽快寻求专业心理医生或精神科医生的帮助,进行全面评估和治疗。";
+            }
+            
+            let anxietyLevel, anxietyText, anxietyClass;
+            if (anxietyScore <= 5) {
+                anxietyLevel = "低";
+                anxietyClass = "level-low";
+                anxietyText = "焦虑水平较低,能够较好地应对日常压力。";
+            } else if (anxietyScore <= 10) {
+                anxietyLevel = "轻度";
+                anxietyClass = "level-mild";
+                anxietyText = "存在一定程度的焦虑,建议通过深呼吸、冥想等放松技巧来缓解。";
+            } else if (anxietyScore <= 15) {
+                anxietyLevel = "中度";
+                anxietyClass = "level-moderate";
+                anxietyText = "焦虑程度较明显,可能影响日常生活,建议寻求专业帮助。";
+            } else {
+                anxietyLevel = "较高";
+                anxietyClass = "level-severe";
+                anxietyText = "焦虑程度较高,严重影响生活质量,需要及时接受专业治疗。";
+            }
+            
+            let depressionLevel, depressionText, depressionClass;
+            if (depressionScore <= 5) {
+                depressionLevel = "低";
+                depressionClass = "level-low";
+                depressionText = "抑郁情绪较轻,情绪状态相对稳定。";
+            } else if (depressionScore <= 10) {
+                depressionLevel = "轻度";
+                depressionClass = "level-mild";
+                depressionText = "存在一定的抑郁情绪,建议增加户外活动,保持规律作息。";
+            } else if (depressionScore <= 15) {
+                depressionLevel = "中度";
+                depressionClass = "level-moderate";
+                depressionText = "抑郁症状较明显,建议进行心理咨询,必要时考虑药物治疗。";
+            } else {
+                depressionLevel = "较高";
+                depressionClass = "level-severe";
+                depressionText = "抑郁程度较严重,请务必寻求专业医疗帮助。";
+            }
+            
+            resultContent.innerHTML = `
+                <div class="score-display">
+                    <h3>总体评分</h3>
+                    <div class="score">${totalScore}</div>
+                    <p>满分30分</p>
+                </div>
+                
+                <div class="result-card">
+                    <h3>整体状况 <span class="level-indicator ${overallClass}">${overallLevel}</span></h3>
+                    <p>${overallText}</p>
+                </div>
+                
+                <div class="result-card">
+                    <h3>焦虑评估 <span class="level-indicator ${anxietyClass}">${anxietyLevel}</span></h3>
+                    <p><strong>焦虑得分:</strong> ${anxietyScore}分</p>
+                    <p>${anxietyText}</p>
+                </div>
+                
+                <div class="result-card">
+                    <h3>抑郁评估 <span class="level-indicator ${depressionClass}">${depressionLevel}</span></h3>
+                    <p><strong>抑郁得分:</strong> ${depressionScore}分</p>
+                    <p>${depressionText}</p>
+                </div>
+                
+                <div class="result-card">
+                    <h3>建议</h3>
+                    <p><strong>自我照顾:</strong> 保持规律作息,适度运动,均衡饮食,避免过度使用电子设备。</p>
+                    <p><strong>社交支持:</strong> 与朋友家人保持联系,分享你的感受,不要孤立自己。</p>
+                    <p><strong>专业帮助:</strong> 如果症状持续或加重,请联系心理咨询师或精神科医生。</p>
+                    <p><strong>紧急情况:</strong> 如有自伤或伤害他人的想法,请立即拨打心理危机热线或前往最近的医院急诊。</p>
+                </div>
+                
+                <div class="disclaimer">
+                    <p><strong>免责声明:</strong> 本测试结果仅供参考,不能作为诊断依据。心理健康问题需要由专业医疗人员进行全面评估和诊断。如果你正在经历严重的情绪困扰,请寻求专业帮助。</p>
+                </div>
+            `;
+        }
+
+        function restartTest() {
+            currentQuestion = 0;
+            answers = [];
+            document.querySelector('.result-screen').classList.remove('active');
+            document.querySelector('.welcome-screen').classList.add('active');
+        }
+    </script>
+</body>
+</html>
